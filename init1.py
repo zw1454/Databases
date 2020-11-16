@@ -8,10 +8,10 @@ import mysql.connector
 app = Flask(__name__)
 
 #Configure MySQL
-conn = mysql.connector.connect(host='localhost',
-                       user='root', port=8889,
-                       password='root',
-                       database='air_ticket')
+conn = mysql.connector.connect(host='192.168.64.2',
+                       user='root',
+                       password='',
+                       database='Airticket_Reservation')
 
 '''
 #Define a route to hello function
