@@ -229,12 +229,46 @@ def staffRegisterAuth():
         flash("registered!")
         return render_template('index.html')
 
-#Define route for cutomer login
-@app.route('/customerLogin')
-def customerLogin():
-    return render_template('customer_login.html')
+#Authenticates the login
+@app.route('/loginAuth', methods=['GET', 'POST'])
+def loginAuth():
+    role = request.form['identity']
+    username = request.form['username']
+    password = request.form['password']
 
+    cursor = conn.cursor()
+    if role == 'customer':
+        query = "SELECT * FROM customer WHERE email = \'{}\' and password = \'{}\'"
+    elif role == 'booking_agent':
+        query = "SELECT * FROM booking_agent WHERE email = \'{}\' and password = \'{}\'"
+    else:
+        query = "SELECT * FROM airline_staff WHERE username = \'{}\' and password = \'{}\'"
+        
+    cursor.execute(query.format(username, password))
+    data = cursor.fetchone()
+    cursor.close()
+    error = None
+    if(data):
+        #creates a session for the the user
+        session['username'] = username
+        session['identity'] = role      #################
+        return redirect(url_for('home'))
+    else:
+        error = 'Invalid login or username'
+        return render_template('login.html', error=error)
 
+#User homepage
+@app.route('/home')
+def home():
+    username = session['username']
+    identity = session['identity']
+    
+    if identity == 'customer':
+        cursor = conn.cursor()
+        query = "SELECT airline_name, flight_num, departure_airport, departure_time, arrival_airport, arrival_time, status FROM purchases NATURAL JOIN (ticket NATURAL JOIN flight) WHERE customer_email = \'{}\'"
+        cursor.execute(query.format(username))
+        data1 = cursor.fetchall()
+        return render_template('home.html', username=username, identity=identity, upcoming=data1)
 
 
 
