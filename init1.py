@@ -117,6 +117,64 @@ def logout():
 def hello():
     return render_template('index.html')
 
+#Define a route to initial home page allowing general research
+@app.route('/flight_search')
+def flight_search():
+	cursor = conn.cursor()
+	#extract all existing arrival_airport
+	query = "SELECT DISTINCT arrival_airport FROM flight"
+	cursor.execute(query)
+	arrival_airport = cursor.fetchall()
+	#extract all existing departure_airport
+	query = "SELECT DISTINCT departure_airport FROM flight"
+	cursor.execute(query)
+	departure_airport = cursor.fetchall()
+	#extract all existing arrival_city
+	query = "SELECT DISTINCT airport_city FROM airport WHERE airport_name IN (SELECT arrival_airport FROM flight)"
+	cursor.execute(query)
+	arrival_city = cursor.fetchall()
+	#extract all existing departure_city
+	query = "SELECT DISTINCT airport_city FROM airport WHERE airport_name IN (SELECT departure_airport FROM flight)"
+	cursor.execute(query)
+	departure_city = cursor.fetchall()
+
+	cursor.close()
+	return render_template('flight_search.html',
+												departure_city=departure_city,
+												departure_airport=departure_airport,
+												arrival_city=arrival_city,
+												arrival_airport=arrival_airport,
+												)
+
+@app.route('/search', methods=['GET','POST'])
+def search():
+	if request.method == 'POST':
+		#grab information based on customer's flight search selection
+		departure_city = request.form['departure_city']
+		departure_airport = request.form['departure_airport']
+		arrival_city = request.form['arrival_city']
+		arrival_airport = request.form['arrival_airport']
+		flight_date = request.form['flight_date']
+		
+		flag1= departure_city != "all"
+		flag2 = departure_airport != "all"
+		flag3 = arrival_city != "all"
+		flag4 = departure_airport != "all"
+		flag5 = True # always specify a flight date for customer selection
+		sub1 = " departure_airport IN (SELECT airport_name FROM airport WHERE airport_city=\'{}\') ".format(departure_city)
+		sub2 = " departure_airport=\'{}\' ".format(departure_airport)
+		sub3 = " arrival_airport IN (SELECT airport_name FROM airport WHERE airport_city=\'{}\') ".format(arrival_city)
+		sub4 = " arrival_airport=\'{}\' ".format(arrival_airport)
+		sub5 = " DATE(departure_time)=DATE(\'{}\') ".format(flight_date)
+		# recall that: boolen * string = string if boolen=True, or "" if boolen=False
+		merged_sub = list(filter(None,[flag1*sub1, flag2*sub2, flag3*sub3, flag4*sub4, flag5*sub5]))
+		query = "SELECT * FROM flight WHERE " + " AND ".join(merged_sub)
+		cursor = conn.cursor()
+		cursor.execute(query)
+		search = cursor.fetchall()
+		cursor.close()
+		return render_template('search_result.html', search=search)
+
 #Define route for login
 @app.route('/login')
 def login():
