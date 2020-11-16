@@ -1,0 +1,43 @@
+<html>
+<head>
+</head>
+<body>
+	{% if identity == "customer" %}
+    <h1>Welcome, our customer {{username}}!</h1>
+
+		<h3>Your upcoming flights:</h3>
+		<style type="text/css">table, th, td{border: 1px solid black;}</style>
+		<table>
+			<th>Airline</th><th>Flight Number</th><th>Departure Airport</th>
+			<th>Departure Time</th><th>Arrival Airport</th><th>Arrival Time</th><th>Status</th>
+		{% for line in upcoming %}
+			<tr>
+				<td>{{line[0]}}</td>
+				<td>{{line[1]}}</td>
+				<td>{{line[2]}}</td>
+				<td>{{line[3]}}</td>
+				<td>{{line[4]}}</td>
+				<td>{{line[5]}}</td>
+				<td>{{line[6]}}</td>
+			</tr>
+		{% endfor %}
+	</table></br>
+
+		<a href="##">Purchase a ticket</a></br>
+		<a href="##">Track my spendings</a></br>
+
+  {% endif %}
+
+	{% if identity == "booking_agent" %}
+		<h1>Welcome, our booking agent {{username}}!</h1>
+	{% endif %}
+
+	{% if identity == "airline_staff" %}
+		<h1>Welcome, our airline staff {{username}}!</h1>
+	{% endif %}
+
+<br/><br/><br/>
+<a href="/logout">Logout</a>
+
+</body>
+</html>
