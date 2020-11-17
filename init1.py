@@ -156,10 +156,10 @@ def search():
 		arrival_airport = request.form['arrival_airport']
 		flight_date = request.form['flight_date']
 		
-		flag1= departure_city != "all"
-		flag2 = departure_airport != "all"
-		flag3 = arrival_city != "all"
-		flag4 = departure_airport != "all"
+		flag1= bool(departure_city != "all")
+		flag2 = bool(departure_airport != "all")
+		flag3 = bool(arrival_city != "all")
+		flag4 = bool(departure_airport != "all")
 		flag5 = True # always specify a flight date for customer selection
 		sub1 = " departure_airport IN (SELECT airport_name FROM airport WHERE airport_city=\'{}\') ".format(departure_city)
 		sub2 = " departure_airport=\'{}\' ".format(departure_airport)
@@ -174,7 +174,38 @@ def search():
 		search = cursor.fetchall()
 		cursor.close()
 		return render_template('search_result.html', search=search)
+	
+#Define route for flight status check
+@app.route('/flight_status')
+def flight_status():
+	return render_template('flight_status.html')
 
+#Check the status of a flight customer intend to inspect
+@app.route('/check_status', methods=['GET', 'POST'])
+def check_status():
+	if request.method == 'POST':
+		flight_number = request.form['flight_number']
+		arrival_date = request.form['arrival_date']
+		departure_date = request.form['departure_date']
+		if (not arrival_date and not departure_date and not flight_number): # all three fields empty, not allowed
+			error = "At least 1 field should be specified!"
+			return render_template('flight_status.html', error = error)
+		else: # valid to check for status:
+			flag1 = bool(flight_number)
+			flag2 = bool(arrival_date)
+			flag3 = bool(departure_date)
+			sub1 = " flight_num = \'{}\' ".format(flight_number)
+			sub2 = " DATE(arrival_time) = DATE(\'{}\') ".format(arrival_date)
+			sub3 = " DATE(departure_time) = DATE(\'{}\') ".format(departure_date)
+			# recall that: boolen * string = string if boolen=True, or "" if boolen=False
+			merged_sub = list(filter(None,[flag1*sub1, flag2*sub2, flag3*sub3]))
+			query = "SELECT airline_name, flight_num, departure_time, arrival_time, status FROM flight WHERE " + " AND ".join(merged_sub)
+			cursor = conn.cursor()
+			cursor.execute(query)
+			status = cursor.fetchall()
+			cursor.close()
+			return render_template('status_result.html', status=status)
+	
 #Define route for login
 @app.route('/login')
 def login():
@@ -309,7 +340,7 @@ def loginAuth():
     if(data):
         #creates a session for the the user
         session['username'] = username
-        session['identity'] = role      #################
+        session['identity'] = role
         return redirect(url_for('home'))
     else:
         error = 'Invalid login or username'
@@ -328,9 +359,6 @@ def home():
         data1 = cursor.fetchall()
         return render_template('home.html', username=username, identity=identity, upcoming=data1)
 
-
-
-        
 app.secret_key = 'some key that you will never guess'
 #Run the app on localhost port 5000
 #debug = True -> you don't have to restart flask
