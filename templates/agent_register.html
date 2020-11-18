@@ -1,0 +1,20 @@
+<html>
+<head>
+	<title>Agent Registration</title>
+</head>
+<body>
+	<h3>Please enter your booking agent information:</h3>
+<form action="/agentRegisterAuth" method="POST">
+	<input type="text" name = "username" placeholder="username" required/>
+		(This has to be a valid email address.)</br>
+	<input type="password" name = "password" placeholder="password" required/></br>
+	<input type="text" name = "agent id" placeholder="your booking agent ID" required/>
+  </br></br></br>
+  <input type="submit" value = Register />
+	{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
+</form>
+<a href="/">Go back</a>
+</body>
+</html>

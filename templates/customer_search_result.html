@@ -1,0 +1,59 @@
+<!-- Databases Fall2020 -->
+<!-- Yukun Jiang Nov.16 2020 -->
+<!DOCTYPE html>
+<html>
+  <!--Basic Background settings-->
+  <meta charset="UTF-8">
+  <meta name="description" content="general">
+  <meta name="author" content="Databases Fall2020">
+  <meta name="keywords" content="databases,html,python,flask,mysql">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> Customer Flight Search Result </title>
+  <body>
+    <h2> Your Flight Search Result</h2>
+      <table border="1">
+        <tr> <!--The title line of flight search-->
+          <th>Airline Name</th>
+          <th>Flight Number</th>
+          <th>Departure Airport</th>
+          <th>Departure Time</th>
+          <th>Arrival Airport</th>
+          <th>Arrival Time</th>
+          <th>Price</th>
+          <th>Status</th>
+          <th>Airplane ID</th>
+          <th>Available Seats</th>
+          <th> </th>
+        </tr>
+
+        {% for result in search %}
+          <tr>
+            <td>{{result[0]}}</td>
+            <td>{{result[1]}}</td>
+            <td>{{result[2]}}</td>
+            <td>{{result[3]}}</td>
+            <td>{{result[4]}}</td>
+            <td>{{result[5]}}</td>
+            <td>{{result[6]}}</td>
+            <td>{{result[7]}}</td>
+            <td>{{result[8]}}</td>
+            {% if result[9] != 0 %}
+              <td><font color="green">{{result[9]}}</font></td> <!-- the remaining seats available-->
+              <td><form action='/cusomter_purchase' method='POST'><input type="hidden" name="airline" value="{{result[0]}}" /><input type="hidden" name="flight_num" value="{{result[1]}}" /><input type="submit" value="Purchase"/></form></td>
+            {% endif %}
+
+            {% if result[9] == 0 %}
+              <td><font color="red">{{result[9]}}</font></td> <!-- already sold out-->
+              <td><font color="red"><i> Sold Out </i></font></td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+        </br>
+        {% if error %}
+          <p class="error" style="color: red"><strong>Error:</strong> {{error}}</p>
+        {% endif %}
+      </table>
+      </br>
+      <a href="/customer_flight_search">Back to Search</a>
+  </body>
+</html>
