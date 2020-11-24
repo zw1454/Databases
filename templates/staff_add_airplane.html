@@ -1,0 +1,45 @@
+<!-- Databases Fall2020 -->
+<!-- Zheng Wang Nov.23 2020 -->
+<!DOCTYPE html>
+<html>
+  <!--Basic Background settings-->
+  <meta charset="UTF-8">
+  <meta name="description" content="general">
+  <meta name="author" content="Databases Fall2020">
+  <meta name="keywords" content="databases,html,python,flask,mysql">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> Add an airplane </title>
+  <body>
+    <!--Form for adding flights-->
+    {% with message = get_flashed_messages() %}
+      {% if message %}
+        <p class="error" style="color: red"><strong>Error:</strong> {{message[0]}}</p>
+      {% endif %}
+    {% endwith %}
+    <h2> You can add an airplane below: </h2>
+    <form action='/home/StaffAddPlaneAuth' method='POST'>
+      <table border="1">
+        <tr> <!--The title line of general flight search-->
+          <th>Airline Name</th>
+          <th>Seats</th>
+        </tr>
+        <tr>
+          <th> <!--option for airline name-->
+          <select name="airline">
+          {% if airline %}
+            <option value="{{airline}}">{{airline}}</option>
+          {% endif %}
+          </select>
+          </th>
+          <th> <!--option for seats-->
+            <input type="number" name="seats" min="1" max="2000" required/></br>
+          </th>
+        </tr>
+      </table>
+      <input type="submit" value="Add">
+    </form>
+
+    <br/><br/>
+    <a href="/home">Go back</a>
+  </body>
+</html>
