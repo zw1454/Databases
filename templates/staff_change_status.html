@@ -1,0 +1,91 @@
+<!-- Databases Fall2020 -->
+<!-- Zheng Wang Nov.18 2020 -->
+<!DOCTYPE html>
+<html>
+  <!--Basic Background settings-->
+  <meta charset="UTF-8">
+  <meta name="description" content="general">
+  <meta name="author" content="Databases Fall2020">
+  <meta name="keywords" content="databases,html,python,flask,mysql">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> Change Flight Status </title>
+  <body>
+    {% with message = get_flashed_messages() %}
+      {% if message %}
+        <p class="error" style="color: red"><strong>Message:</strong> {{message[0]}}</p>
+      {% endif %}
+    {% endwith %}
+    <h2> Select the flight whose status you want to change: </h2>
+    <form action='/home/StaffConfirmStatus' method='POST'>
+      <table border="1">
+        <tr> <!--The title line of general flight search-->
+          <th>Airline Name</th>
+          <th>Flight Number</th>
+        </tr>
+        <tr>
+          <th> <!--option for airline name-->
+          <select name="airline">
+          {% if airline %}
+            <option value="{{airline}}">{{airline}}</option>
+          {% endif %}
+          </select>
+          </th>
+          <th>
+          <select name="flight_num">
+          {% if flight_num and not confirm%}
+            {% for line in flight_num %}
+              <option value={{line[0]}}>{{line[0]}}</option>
+            {% endfor %}
+          {% endif %}
+          {% if flight_num and confirm%}
+            <option value={{flight_num}}>{{flight_num}}</option>
+          {% endif %}
+          </select>
+          </th>
+        </tr>
+      </table>
+      <input type="submit" value="Select">
+    </form>
+    {% if error %}
+      <p class="error" style="color: red"><strong>Error:</strong> {{error}}</p>
+    {% endif %}
+
+    {% if confirm %}
+      <p class="error" style="color: blue">Please view the current flight status below and confirm you change:</p>
+      <form action='/home/StaffSetFinalStatus' method='POST'>
+        <table border="1">
+          <tr> <!--The title line of flight-->
+            <th>Airline</th>
+            <th>Flight Number</th>
+            <th>Current Status</th>
+            <th>Your Selection</th>
+          </tr>
+          <tr>
+            <td>
+            <select name="airline">
+            <option value="{{airline}}">{{airline}}</option>
+            </select>
+            </td>
+            <td>
+            <select name="flight_num">
+            <option value="{{flight_num}}">{{flight_num}}</option>
+            </select>
+            </td>
+            <td>{{status}}</td>
+            <td>
+              <select name="selected_status">
+              <option value="upcoming">upcoming</option>
+              <option value="in progress">in progress</option>
+              <option value="delayed">delayed</option>
+              </select>
+            </td>
+          </tr>
+        </table>
+        <input type="submit" value="Confirm">
+    </form>
+    {% endif %}
+
+    <br/><br/>
+    <a href="/home">Go back</a>
+  </body>
+</html>

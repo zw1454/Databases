@@ -1,0 +1,67 @@
+<!-- Databases Fall2020 -->
+<!-- Zheng Wang Nov.23 2020 -->
+<!DOCTYPE html>
+<html>
+  <!--Basic Background settings-->
+  <meta charset="UTF-8">
+  <meta name="description" content="general">
+  <meta name="author" content="Databases Fall2020">
+  <meta name="keywords" content="databases,html,python,flask,mysql">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> View Frequent Customers </title>
+  <body>
+    <h2> Below are the most frequent customers of your airline: </h2>
+    <table border="1">
+      <tr> <!--The title line of flight-->
+        <th>Email</th>
+        <th>Name</th>
+        <th>Phone Number</th>
+        <th>City</th>
+        <th>State</th>
+        <th>Date of Birth</th>
+      </tr>
+
+      {% for line in most_freq_customer %}
+      <tr>
+        <td>{{line[0]}}</td>
+        <td>{{line[1]}}</td>
+        <td>{{line[2]}}</td>
+        <td>{{line[3]}}</td>
+        <td>{{line[4]}}</td>
+        <td>{{line[5]}}</td>
+      </tr>
+      {% endfor %}
+    </table>
+
+    <!--Form for viewing flights of a partucular customer-->
+    <h2> You can view flights of the following customer: </h2>
+    <form action='/home/staff_view_freq_customer/StaffViewCustomerFlight' method='POST'>
+      <table border="1">
+        <tr> <!--The title line of general flight search-->
+          <th>Customer Email</th>
+        </tr>
+        <tr>
+        <th> <!--option for customer email-->
+        <select name="email" required>
+        {% if email %}
+          {% for line in email %}
+            <option value="{{line[0]}}">{{line[0]}}</option>
+          {% endfor %}
+        {% endif %}
+        </select>
+        </th>
+      </table>
+        <input type="submit" value="Search">
+    </form>
+
+    {% with message = get_flashed_messages() %}
+      {% if message %}
+        <p class="error" style="color: red"><strong>Error:</strong> {{message[0]}}</p>
+      {% endif %}
+    {% endwith %}
+
+
+    <br/><br/>
+    <a href="/home">Go back</a>
+  </body>
+</html>

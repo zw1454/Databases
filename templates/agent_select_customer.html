@@ -1,0 +1,38 @@
+<!-- Databases Fall2020 -->
+<!-- Zheng Wang Nov.25 2020 -->
+<!DOCTYPE html>
+<html>
+  <!--Basic Background settings-->
+  <meta charset="UTF-8">
+  <meta name="description" content="general">
+  <meta name="author" content="Databases Fall2020">
+  <meta name="keywords" content="databases,html,python,flask,mysql">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> Agent Select Customer </title>
+  <body>
+    <h2> Please select the customer for {{airline}} {{flight_num}}</h2>
+      <form action='/home/agent_search/agent_purchase' method='POST'>
+        <table border="1">
+          <tr> <!--The title line of general flight search-->
+            <th>Customer Email</th>
+          </tr>
+          <tr>
+            <th> <!--option for airline name-->
+            <select name="email">
+            {% if email %}
+              {% for line in email %}
+                <option value="{{line[0]}}">{{line[0]}}</option>
+              {% endfor %}
+            {% endif %}
+            </select>
+            </th>
+          </tr>
+        </table>
+        <input type="hidden" name="airline" value="{{airline}}" />
+        <input type="hidden" name="flight_num" value="{{flight_num}}" />
+        <input type="submit" value="Purchase">
+      </form>
+      </br>
+      <a href="/home/agent_flight_search">Back to Search</a>
+  </body>
+</html>

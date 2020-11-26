@@ -1,0 +1,34 @@
+<!-- Databases Fall2020 -->
+<!-- Yukun Jiang Nov.16 2020 -->
+<!DOCTYPE html>
+<html>
+  <!--Basic Background settings-->
+  <meta charset="UTF-8">
+  <meta name="description" content="general">
+  <meta name="author" content="Databases Fall2020">
+  <meta name="keywords" content="databases,html,python,flask,mysql">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> Confirmation Page </title>
+  <body>
+    <p class="error" style="color: blue"><strong>Success: </strong>You have added an airplane!</p>
+    <h2> Below are all the airplanes owned by your airline:</h2>
+      <table border="1">
+        <tr> <!--The title line of flight search-->
+          <th>Airline Name</th>
+          <th>Airplane ID</th>
+          <th>Seats</th>
+        </tr>
+
+        {% for result in airplane %}
+          <tr>
+            <td>{{result[0]}}</td>
+            <td>{{result[1]}}</td>
+            <td>{{result[2]}}</td>
+          </tr>
+        {% endfor %}
+        </br>
+      </table>
+      </br>
+      <a href="/home/staff_add_airplane">Back to add another airplane</a>
+  </body>
+</html>
