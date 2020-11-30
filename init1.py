@@ -1100,19 +1100,19 @@ def staff_create_flight():
     cursor.execute(query.format(airline[0]))
     flights = cursor.fetchall()
     #extract all existing arrival_airport
-    query = "SELECT DISTINCT arrival_airport FROM flight"
+    query = "SELECT DISTINCT airport_name FROM airport"
     cursor.execute(query)
     arrival_airport = cursor.fetchall()
     #extract all existing departure_airport
-    query = "SELECT DISTINCT departure_airport FROM flight"
+    query = "SELECT DISTINCT airport_name FROM airport"
     cursor.execute(query)
     departure_airport = cursor.fetchall()
     #extract all existing arrival_city
-    query = "SELECT DISTINCT airport_city FROM airport WHERE airport_name IN (SELECT arrival_airport FROM flight)"
+    query = "SELECT DISTINCT airport_city FROM airport"
     cursor.execute(query)
     arrival_city = cursor.fetchall()
     #extract all existing departure_city
-    query = "SELECT DISTINCT airport_city FROM airport WHERE airport_name IN (SELECT departure_airport FROM flight)"
+    query = "SELECT DISTINCT airport_city FROM airport"
     cursor.execute(query)
     departure_city = cursor.fetchall()
     #extract all the flight numbers
@@ -1355,7 +1355,7 @@ def staff_view_agent():
     #find top agents in past month based on tickets sold
     query = "SELECT b.email, b.booking_agent_id, COUNT(p.ticket_id) " +\
             "FROM booking_agent b, purchases p " +\
-            "WHERE p.purchase_date >= ADDDATE(p.purchase_date, INTERVAL -1 MONTH) " +\
+            "WHERE p.purchase_date >= ADDDATE(DATE(NOW()), INTERVAL -1 MONTH) " +\
             "AND p.booking_agent_id = b.booking_agent_id GROUP BY b.email, b.booking_agent_id " +\
             "ORDER BY COUNT(p.ticket_id) DESC; "
     cursor = conn.cursor()
@@ -1374,7 +1374,7 @@ def staff_view_agent():
     #find top agents in past year based on tickets sold
     query = "SELECT b.email, b.booking_agent_id, COUNT(p.ticket_id) " +\
             "FROM booking_agent b, purchases p " +\
-            "WHERE p.purchase_date >= ADDDATE(p.purchase_date, INTERVAL -12 MONTH) " +\
+            "WHERE p.purchase_date >= ADDDATE(DATE(NOW()), INTERVAL -12 MONTH) " +\
             "AND p.booking_agent_id = b.booking_agent_id GROUP BY b.email, b.booking_agent_id " +\
             "ORDER BY COUNT(p.ticket_id) DESC; "
     cursor = conn.cursor()
@@ -1393,7 +1393,7 @@ def staff_view_agent():
     #find top agents in past year based on commission earned
     query = "SELECT b.email, b.booking_agent_id, 0.1*SUM(f.price) " +\
             "FROM booking_agent b, purchases p, ticket t, flight f " +\
-            "WHERE p.purchase_date >= ADDDATE(p.purchase_date, INTERVAL -12 MONTH) " +\
+            "WHERE p.purchase_date >= ADDDATE(DATE(NOW()), INTERVAL -12 MONTH) " +\
             "AND p.booking_agent_id = b.booking_agent_id AND " +\
             "f.flight_num = t.flight_num AND f.airline_name = t.airline_name " +\
             "AND t.ticket_id = p.ticket_id GROUP BY b.email, b.booking_agent_id " +\
