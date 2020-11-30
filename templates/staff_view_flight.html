@@ -63,7 +63,7 @@
           <option value="all">All</option>
           {% if departure_city %}
             {% for city in departure_city %}
-              <option value={{city[0]}}>{{city[0]}}</option>
+              <option value="{{city[0]}}">{{city[0]}}</option>
             {% endfor %}
           {% endif %}
           </select>
@@ -74,7 +74,7 @@
           <option value="all">All</option>
           {% if departure_airport %}
             {% for airport in departure_airport %}
-              <option value={{airport[0]}}>{{airport[0]}}</option>
+              <option value="{{airport[0]}}">{{airport[0]}}</option>
             {% endfor %}
           {% endif %}
           </select>
@@ -85,7 +85,7 @@
           <option value="all">All</option>
           {% if arrival_city %}
             {% for city in arrival_city %}
-              <option value={{city[0]}}>{{city[0]}}</option>
+              <option value="{{city[0]}}">{{city[0]}}</option>
             {% endfor %}
           {% endif %}
           </select>
@@ -96,7 +96,7 @@
           <option value="all">All</option>
           {% if arrival_airport %}
             {% for airport in arrival_airport %}
-              <option value={{airport[0]}}>{{airport[0]}}</option>
+              <option value="{{airport[0]}}">{{airport[0]}}</option>
             {% endfor %}
           {% endif %}
           </select>
@@ -136,7 +136,7 @@
         <select name="flight_number" required>
         {% if flight_number %}
           {% for line in flight_number %}
-            <option value={{line[0]}}>{{line[0]}}</option>
+            <option value="{{line[0]}}">{{line[0]}}</option>
           {% endfor %}
         {% endif %}
         </select>
