@@ -15,10 +15,11 @@ app = Flask(__name__)
 
 #Configure MySQL
 conn = mysql.connector.connect(host='localhost',
-                       port=8889,
-                       user='root',
-                       password='root',
-                       database='air_ticket')
+                               port=8889,
+                               user='root',
+                               password='root',
+                               database='air_ticket')
+
 #Helper function for making pie plot
 def make_autopct(values):
     def my_autopct(pct):
@@ -30,24 +31,24 @@ def make_autopct(values):
 
 #making the pie chart plot
 def make_pie(username, index, value):
-        plt.figure(figsize=(7,6.5))
-        plt.pie(value, labels=index, autopct=make_autopct(value))
-        plt.title("Pie: Your Spending in the Last 6 Months")
-        plt.legend(loc='upper left')
-        output_path = './templates/pic/'+username+'_pie.png'
-        plt.savefig(output_path)
-        return output_path
+    plt.figure(figsize=(7,6.5))
+    plt.pie(value, labels=index, autopct=make_autopct(value))
+    plt.title("Pie: Your Spending in the Last 6 Months")
+    plt.legend(loc='upper left')
+    output_path = './templates/pic/'+username+'_pie.png'
+    plt.savefig(output_path)
+    return output_path
 
 #making the bar chart plot
 def make_bar(username, index, value):
-        plt.figure(figsize=(7,6.5))
-        plt.bar(index, height=value)
-        plt.title("Bar: Your Spending in the Last 6 Months")
-        plt.ylabel("Spending")
-        plt.xlabel("Month")
-        output_path = './templates/pic/'+username+'_bar.png'
-        plt.savefig(output_path)
-        return output_path
+    plt.figure(figsize=(7,6.5))
+    plt.bar(index, height=value)
+    plt.title("Bar: Your Spending in the Last 6 Months")
+    plt.ylabel("Spending")
+    plt.xlabel("Month")
+    output_path = './templates/pic/'+username+'_bar.png'
+    plt.savefig(output_path)
+    return output_path
         
 #Define a route to hello function
 @app.route('/')
@@ -151,6 +152,37 @@ def check_status():
 def login():
     return render_template('login.html')
 
+#Authenticates the login
+@app.route('/loginAuth', methods=['GET', 'POST'])
+def loginAuth():
+    role = request.form['identity']
+    username = request.form['username']
+    password = request.form['password']
+
+    cursor = conn.cursor()
+    if role == 'customer':
+        query = "SELECT * FROM customer WHERE email = \'{}\' and password = MD5(\'{}\') "
+#        query = "SELECT * FROM customer WHERE email = \'{}\' and password = \'{}\' "
+    elif role == 'booking_agent':
+        query = "SELECT * FROM booking_agent WHERE email = \'{}\' and password = MD5(\'{}\') "
+#        query = "SELECT * FROM booking_agent WHERE email = \'{}\' and password = \'{}\' "
+    else:
+        query = "SELECT * FROM airline_staff WHERE username = \'{}\' and password = MD5(\'{}\') "
+#        query = "SELECT * FROM airline_staff WHERE username = \'{}\' and password = \'{}\' "
+        
+    cursor.execute(query.format(username, password))
+    data = cursor.fetchone()
+    cursor.close()
+    error = None
+    if(data):
+        #creates a session for the the user
+        session['username'] = username
+        session['identity'] = role
+        return redirect(url_for('home'))
+    else:
+        error = 'Invalid login or username'
+        return render_template('login.html', error=error)
+
 #Define route for register
 @app.route('/register')
 def register():
@@ -185,7 +217,8 @@ def customerRegisterAuth():
         error = "This user already exists"
         return render_template('customer_register.html', error = error)
     else:
-        ins = "INSERT INTO customer VALUES(\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\' )"      
+        ins = "INSERT INTO customer VALUES(\'{}\', \'{}\', MD5(\'{}\'), \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\' )"
+#        ins = "INSERT INTO customer VALUES(\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\' )"
         cursor.execute(ins.format(email, name, password, building_num, street, city,
                 state, phone, pp_num, pp_expir_date, pp_country, birthday))
         conn.commit()
@@ -226,7 +259,8 @@ def agentRegisterAuth():
             agent_id = int(old_id[0]) + 1
         
         cursor = conn.cursor()
-        ins = "INSERT INTO booking_agent VALUES(\'{}\', \'{}\', \'{}\')"      
+        ins = "INSERT INTO booking_agent VALUES(\'{}\', MD5(\'{}\'), \'{}\')"  
+#        ins = "INSERT INTO booking_agent VALUES(\'{}\', \'{}\', \'{}\')" 
         cursor.execute(ins.format(email, password, agent_id))
         conn.commit()
         cursor.close()
@@ -262,40 +296,13 @@ def staffRegisterAuth():
         error = "This user already exists"
         return render_template('staff_register.html', error = error)
     else:
-        ins = "INSERT INTO airline_staff VALUES(\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\')"      
+        ins = "INSERT INTO airline_staff VALUES(\'{}\', MD5(\'{}\'), \'{}\', \'{}\', \'{}\', \'{}\')" 
+#        ins = "INSERT INTO airline_staff VALUES(\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\')"
         cursor.execute(ins.format(email, password, first_name, last_name, birthday, airline))
         conn.commit()
         cursor.close()
         flash("registered!")
         return render_template('index.html')
-
-#Authenticates the login
-@app.route('/loginAuth', methods=['GET', 'POST'])
-def loginAuth():
-    role = request.form['identity']
-    username = request.form['username']
-    password = request.form['password']
-
-    cursor = conn.cursor()
-    if role == 'customer':
-        query = "SELECT * FROM customer WHERE email = \'{}\' and password = \'{}\'"
-    elif role == 'booking_agent':
-        query = "SELECT * FROM booking_agent WHERE email = \'{}\' and password = \'{}\'"
-    else:
-        query = "SELECT * FROM airline_staff WHERE username = \'{}\' and password = \'{}\'"
-        
-    cursor.execute(query.format(username, password))
-    data = cursor.fetchone()
-    cursor.close()
-    error = None
-    if(data):
-        #creates a session for the the user
-        session['username'] = username
-        session['identity'] = role
-        return redirect(url_for('home'))
-    else:
-        error = 'Invalid login or username'
-        return render_template('login.html', error=error)
 
 #User homepage
 @app.route('/home')
@@ -772,7 +779,7 @@ def agent_purchase():
                                   "WHERE customer_email=\'{}\' AND airline_name=\'{}\' " +\
                                   "AND flight_num=\'{}\' ;"
         cursor.execute(multiple_purchase_query.format(customer_email, airline, flight_num))
-        multiple_purchase = cursor.fetchone()
+        multiple_purchase = cursor.fetchall()
         cursor.close()
         if (multiple_purchase):
             warning = "Warning: Your customer already had a ticket for flight \"{}-{}\", no multiple purchases allowed!"
@@ -857,7 +864,6 @@ def agent_customize_commission():
         ending_date = request.form['ending_date']
         #starting date must be earlier
         if starting_date > ending_date:
-            print('jdfjdbfjdbfjbj')
             error = "Starting date must be earlier than ending date!"
             flash(error) 
             return redirect(url_for('agent_view_commission'))
@@ -903,9 +909,9 @@ def agent_top_customer():
     cursor.close()
     
     #find top customers in past 6 months based on tickets sold
-    query = "SELECT p.customer_email, c.name, c.phone_number, c.city, c.state, c.date_of_birth " +\
+    query = "SELECT p.customer_email, COUNT(p.customer_email), c.name, c.phone_number, c.city, c.state, c.date_of_birth " +\
             "FROM purchases p, customer c " +\
-            "WHERE p.booking_agent_id = \'{}\' AND p.purchase_date >= ADDDATE(p.purchase_date, INTERVAL -6 MONTH) " +\
+            "WHERE p.booking_agent_id = \'{}\' AND p.purchase_date >= ADDDATE(DATE(NOW()), INTERVAL -6 MONTH) " +\
             "AND p.customer_email = c.email " +\
             "GROUP BY p.customer_email " +\
             "ORDER BY COUNT(p.customer_email) DESC; "
@@ -923,9 +929,9 @@ def agent_top_customer():
     customer_ticket = tuple(customer)
     
     #find top customers in past 6 months based on commission earned
-    query = "SELECT p.customer_email, c.name, c.phone_number, c.city, c.state, c.date_of_birth " +\
+    query = "SELECT p.customer_email, 0.1 * SUM(f.price), c.name, c.phone_number, c.city, c.state, c.date_of_birth " +\
             "FROM purchases p, ticket t, flight f, customer c " +\
-            "WHERE p.booking_agent_id = 1 AND p.purchase_date >= ADDDATE(p.purchase_date, INTERVAL -6 MONTH) " +\
+            "WHERE p.booking_agent_id = \'{}\' AND p.purchase_date >= ADDDATE(DATE(NOW()), INTERVAL -6 MONTH) " +\
             "AND p.ticket_id = t.ticket_id AND t.airline_name = f.airline_name " +\
             "AND t.flight_num = f.flight_num AND p.customer_email = c.email " +\
             "GROUP BY p.customer_email ORDER BY SUM(f.price) DESC; "
@@ -942,8 +948,28 @@ def agent_top_customer():
     cursor.close()
     customer_commission = tuple(customer)
     
+    x_ticket = [row[2] for row in customer_ticket]
+    y_ticket = [int(row[1]) for row in customer_ticket]
+    
+    x_commission = [row[2] for row in customer_commission]
+    y_commission = [float(row[1]) for row in customer_commission]
+    
+    img = BytesIO()
+    fig, (ax1, ax2) = plt.subplots(2, figsize=(10,10))
+    ax1.bar(x_ticket, height=y_ticket, width=0.2, color='lightgreen', edgecolor='blue')
+    ax1.set_xlabel('customer')
+    ax1.set_ylabel('ticket number sold')
+    ax1.set_title('Top 5 Customer Ticket Sold')
+    ax2.bar(x_commission, height=y_commission, width=0.3, color='yellow', edgecolor='red')
+    ax2.set_xlabel('customer')
+    ax2.set_ylabel('commission ($)')
+    ax2.set_title('Top 5 Customer Commission Earned')
+    fig.legend(loc='center right')
+    fig.savefig(img, format='png')
+    img.seek(0)
+    plot_url = base64.b64encode(img.getvalue()).decode('utf8')
     return render_template('agent_top_customer.html', customer_ticket=customer_ticket,
-                                                      customer_commission=customer_commission)
+                                                      customer_commission=customer_commission, plot_url=plot_url)
         
 ###################### Begin Airline Staff ##################################
 
@@ -1218,7 +1244,7 @@ def StaffConfirmStatus():
     query = "SELECT status FROM flight WHERE airline_name = \'{}\' AND flight.flight_num = \'{}\' ;"
     cursor.execute(query.format(airline, flight_num))
     status = cursor.fetchone()
-    cursor.close()##-----！！！&&&##
+    cursor.close()
     return render_template('staff_change_status.html', confirm=True,
                                                        status=status[0],
                                                        airline=airline,
@@ -1251,7 +1277,7 @@ def staff_add_airplane():
     query = "SELECT airline_name FROM airline_staff WHERE username = \'{}\'"
     cursor.execute(query.format(username))
     airline = cursor.fetchone()
-    cursor.close()##-----！！！&&&##
+    cursor.close()
     return render_template('staff_add_airplane.html', airline=airline[0])
 
 @app.route('/home/StaffAddPlaneAuth', methods=['GET', 'POST'])
@@ -1271,7 +1297,7 @@ def StaffAddPlaneAuth():
     query = "SELECT MAX(airplane_id) FROM airplane WHERE airline_name = \'{}\'; "
     cursor.execute(query.format(airline))
     old_id = cursor.fetchone()
-    cursor.close()##-----！！！&&&##
+    cursor.close()
     if not old_id[0]: # no plane exists yet
         new_id = 1
     else:
@@ -1288,7 +1314,7 @@ def StaffAddPlaneAuth():
     query = "SELECT * FROM airplane WHERE airline_name = \'{}\'; "
     cursor.execute(query.format(airline))
     planes = cursor.fetchall()
-    cursor.close()##-----！！！&&&##
+    cursor.close()
     return render_template('staff_add_airplane_confirmation.html', airplane=planes)
 
 @app.route('/home/staff_add_airport')
@@ -1314,13 +1340,80 @@ def StaffAddAirportAuth():
     if flag[0] == 1: # duplicated name exists
         flash("Do not enter a duplicated airport name!")
         return redirect(url_for('staff_add_airport'))
-    cursor.close()##-----！！！&&&##
+    cursor.close()
     cursor = conn.cursor()
     query = "INSERT INTO airport VALUES(\'{}\', \'{}\');"
     cursor.execute(query.format(airport, city))
     conn.commit()
-    cursor.close()##-----！！！&&&##
+    cursor.close()
     return render_template('staff_add_airport.html', success='success')
+
+@app.route('/home/staff_view_agent')
+def staff_view_agent():
+    username = session['username']
+    
+    #find top agents in past month based on tickets sold
+    query = "SELECT b.email, b.booking_agent_id, COUNT(p.ticket_id) " +\
+            "FROM booking_agent b, purchases p " +\
+            "WHERE p.purchase_date >= ADDDATE(p.purchase_date, INTERVAL -1 MONTH) " +\
+            "AND p.booking_agent_id = b.booking_agent_id GROUP BY b.email, b.booking_agent_id " +\
+            "ORDER BY COUNT(p.ticket_id) DESC; "
+    cursor = conn.cursor()
+    cursor.execute(query)
+    agent = []
+    #scan the results to fetch <= top 5 customers if exist
+    agt = cursor.fetchone()
+    count = 1
+    while agt and count <= 5:
+        agent.append(list(agt))
+        agt = cursor.fetchone()
+        count += 1
+    cursor.close()
+    agent_ticket_month = tuple(agent)
+    
+    #find top agents in past year based on tickets sold
+    query = "SELECT b.email, b.booking_agent_id, COUNT(p.ticket_id) " +\
+            "FROM booking_agent b, purchases p " +\
+            "WHERE p.purchase_date >= ADDDATE(p.purchase_date, INTERVAL -12 MONTH) " +\
+            "AND p.booking_agent_id = b.booking_agent_id GROUP BY b.email, b.booking_agent_id " +\
+            "ORDER BY COUNT(p.ticket_id) DESC; "
+    cursor = conn.cursor()
+    cursor.execute(query)
+    agent = []
+    #scan the results to fetch <= top 5 customers if exist
+    agt = cursor.fetchone()
+    count = 1
+    while agt and count <= 5:
+        agent.append(list(agt))
+        agt = cursor.fetchone()
+        count += 1
+    cursor.close()
+    agent_ticket_year = tuple(agent)
+    
+    #find top agents in past year based on commission earned
+    query = "SELECT b.email, b.booking_agent_id, 0.1*SUM(f.price) " +\
+            "FROM booking_agent b, purchases p, ticket t, flight f " +\
+            "WHERE p.purchase_date >= ADDDATE(p.purchase_date, INTERVAL -12 MONTH) " +\
+            "AND p.booking_agent_id = b.booking_agent_id AND " +\
+            "f.flight_num = t.flight_num AND f.airline_name = t.airline_name " +\
+            "AND t.ticket_id = p.ticket_id GROUP BY b.email, b.booking_agent_id " +\
+            "ORDER BY SUM(f.price) DESC; "
+    cursor = conn.cursor()
+    cursor.execute(query)
+    agent = []
+    #scan the results to fetch <= top 5 customers if exist
+    agt = cursor.fetchone()
+    count = 1
+    while agt and count <= 5:
+        agent.append(list(agt))
+        agt = cursor.fetchone()
+        count += 1
+    cursor.close()
+    agent_commission = tuple(agent)
+    
+    return render_template('staff_view_agent.html', agent_ticket_month=agent_ticket_month,
+                                                    agent_ticket_year=agent_ticket_year,
+                                                    agent_commission=agent_commission)
 
 @app.route('/home/staff_view_freq_customer')
 def staff_view_freq_customer():
@@ -1360,7 +1453,7 @@ def staff_view_freq_customer():
     query = "SELECT email FROM customer"
     cursor.execute(query)
     email = cursor.fetchall()
-    cursor.close()##-----！！！&&&##
+    cursor.close()
     return render_template('staff_view_freq_customer.html', most_freq_customer=most_freq_customer,
                                                             email=email)
     
@@ -1379,7 +1472,7 @@ def StaffViewCustomerFlight():
         query = "SELECT airline_name FROM airline_staff WHERE username = \'{}\'"
         cursor.execute(query.format(username))
         airline = cursor.fetchone()
-        cursor.close()##-----！！！&&&##
+        cursor.close()
         email = request.form['email']
         cursor = conn.cursor()
         query = "SELECT f.airline_name, f.flight_num, f.departure_airport, f.departure_time, " +\
@@ -1389,7 +1482,7 @@ def StaffViewCustomerFlight():
                 "AND t.airline_name = f.airline_name AND t.flight_num = f.flight_num AND f.airline_name = \'{}\' ;"
         cursor.execute(query.format(email, airline[0]))
         flight = cursor.fetchall()
-        cursor.close()##-----！！！&&&##
+        cursor.close()
         return render_template('staff_view_customer_flight_result.html', flight=flight)
     
 @app.route('/home/staff_top_destination')
@@ -1401,15 +1494,15 @@ def staff_top_destination():
     query = "SELECT airline_name FROM airline_staff WHERE username = \'{}\'"
     cursor.execute(query.format(username))
     airline = cursor.fetchone()
-    cursor.close()##-----！！！&&&##
+    cursor.close()
     #query for top destinations in the past 3 months
     month_query = "SELECT f.arrival_airport, a.airport_city " +\
-            "FROM purchases p, ticket t, flight f, airport a " +\
-            "WHERE p.ticket_id = t.ticket_id AND t.airline_name = f.airline_name " +\
-            "AND t.flight_num = f.flight_num AND f.airline_name = \'{}\' AND " +\
-            "(f.arrival_time BETWEEN ADDDATE(NOW(), INTERVAL -3 MONTH) AND NOW()) " +\
-            "AND a.airport_name = f.arrival_airport " +\
-            "GROUP BY arrival_airport ORDER BY COUNT(p.customer_email) DESC;"
+                  "FROM purchases p, ticket t, flight f, airport a " +\
+                  "WHERE p.ticket_id = t.ticket_id AND t.airline_name = f.airline_name " +\
+                  "AND t.flight_num = f.flight_num AND f.airline_name = \'{}\' AND " +\
+                  "(f.arrival_time BETWEEN ADDDATE(NOW(), INTERVAL -3 MONTH) AND NOW()) " +\
+                  "AND a.airport_name = f.arrival_airport " +\
+                  "GROUP BY arrival_airport ORDER BY COUNT(p.customer_email) DESC;"
     cursor = conn.cursor()
     cursor.execute(month_query.format(airline[0]))
     destination = []
@@ -1420,17 +1513,17 @@ def staff_top_destination():
         destination.append(list(dest))
         dest = cursor.fetchone()
         count += 1
-    cursor.close()##-----！！！&&&##
+    cursor.close()
     destination_month = tuple(destination)
     
     #query for top destinations in the past year
     year_query = "SELECT f.arrival_airport, a.airport_city " +\
-            "FROM purchases p, ticket t, flight f, airport a " +\
-            "WHERE p.ticket_id = t.ticket_id AND t.airline_name = f.airline_name " +\
-            "AND t.flight_num = f.flight_num AND f.airline_name = \'{}\' AND " +\
-            "(f.arrival_time BETWEEN ADDDATE(NOW(), INTERVAL -12 MONTH) AND NOW()) " +\
-            "AND a.airport_name = f.arrival_airport " +\
-            "GROUP BY arrival_airport ORDER BY COUNT(p.customer_email) DESC;"
+                 "FROM purchases p, ticket t, flight f, airport a " +\
+                 "WHERE p.ticket_id = t.ticket_id AND t.airline_name = f.airline_name " +\
+                 "AND t.flight_num = f.flight_num AND f.airline_name = \'{}\' AND " +\
+                 "(f.arrival_time BETWEEN ADDDATE(NOW(), INTERVAL -12 MONTH) AND NOW()) " +\
+                 "AND a.airport_name = f.arrival_airport " +\
+                 "GROUP BY arrival_airport ORDER BY COUNT(p.customer_email) DESC;"
     cursor = conn.cursor()
     cursor.execute(year_query.format(airline[0]))
     destination = []
@@ -1441,7 +1534,7 @@ def staff_top_destination():
         destination.append(list(dest))
         dest = cursor.fetchone()
         count += 1
-    cursor.close()##-----！！！&&&##
+    cursor.close()
     destination_year = tuple(destination)
     
     return render_template('staff_top_destination.html', destination_month=destination_month,
