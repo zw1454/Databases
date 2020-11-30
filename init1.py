@@ -102,11 +102,11 @@ def search():
             error = "At least 1 field should be specified!"
             return render_template('search_result.html', error=error)
         else:
-            sub1 = " departure_airport IN (SELECT airport_name FROM airport WHERE airport_city=\'{}\') ".format(departure_city)
-            sub2 = " departure_airport = \'{}\' ".format(departure_airport)
-            sub3 = " arrival_airport IN (SELECT airport_name FROM airport WHERE airport_city=\'{}\') ".format(arrival_city)
-            sub4 = " arrival_airport =\'{}\' ".format(arrival_airport)
-            sub5 = " DATE(departure_time) = DATE(\'{}\') ".format(flight_date)
+            sub1 = ' departure_airport IN (SELECT airport_name FROM airport WHERE airport_city=\"{}\") '.format(departure_city)
+            sub2 = ' departure_airport = \"{}\" '.format(departure_airport)
+            sub3 = ' arrival_airport IN (SELECT airport_name FROM airport WHERE airport_city=\"{}\") '.format(arrival_city)
+            sub4 = ' arrival_airport =\"{}\" '.format(arrival_airport)
+            sub5 = ' DATE(departure_time) = DATE(\"{}\") '.format(flight_date)
             # recall that: boolen * string = string if boolen=True, or "" if boolen=False
             merged_sub = list(filter(None,[flag1*sub1, flag2*sub2, flag3*sub3, flag4*sub4, flag5*sub5]))
             query = "SELECT * FROM flight WHERE " + " AND ".join(merged_sub)
@@ -373,9 +373,9 @@ def customer_search():
             return render_template('customer_search_result.html', error=error)
         else:
             sub1 = " departure_airport IN (SELECT airport_name FROM airport WHERE airport_city=\'{}\') ".format(departure_city)
-            sub2 = " departure_airport = \'{}\' ".format(departure_airport)
+            sub2 = ' departure_airport = \"{}\" '.format(departure_airport)
             sub3 = " arrival_airport IN (SELECT airport_name FROM airport WHERE airport_city=\'{}\') ".format(arrival_city)
-            sub4 = " arrival_airport =\'{}\' ".format(arrival_airport)
+            sub4 = ' arrival_airport =\"{}\" '.format(arrival_airport)
             sub5 = " DATE(departure_time) = DATE(\'{}\') ".format(flight_date)
             # recall that: boolen * string = string if boolen=True, or "" if boolen=False
             merged_sub = list(filter(None,[flag1*sub1, flag2*sub2, flag3*sub3, flag4*sub4, flag5*sub5]))
@@ -454,7 +454,7 @@ def customer_spending():
     last_year_query = "SELECT SUM(price) FROM purchases NATURAL JOIN ticket NATURAL JOIN flight  WHERE customer_email= \'{}\' AND purchase_date BETWEEN date_sub(DATE(NOW()), interval 1 year) AND DATE(NOW())".format(username)
     cursor.execute(last_year_query)
     last_year = cursor.fetchone()
-    cursor.close()##-----！！！&&&##
+    cursor.close()
     if not last_year:
         last_year = "0"
     else:
@@ -476,7 +476,7 @@ def customer_spending():
         if spending[2]:
             month_spending[i] = int(spending[2])
         month_index.append(str(spending[0])+'-'+str(spending[1]))
-    cursor.close()##-----！！！&&&##
+    cursor.close()
     # open a "deceiving" ByteIO thread to generate the return make the url for plot
     img = BytesIO()
     fig, (ax1, ax2) = plt.subplots(2, figsize=(10,10))
@@ -510,7 +510,7 @@ def customize_spending():
         total_query = "SELECT SUM(price) FROM purchases NATURAL JOIN ticket NATURAL JOIN flight  WHERE customer_email= \'{}\' AND (YEAR(purchase_date) BETWEEN \'{}\' AND \'{}\') AND (MONTH(purchase_date) BETWEEN \'{}\' AND \'{}\')".format(username,start_year, end_year,start_month,end_month)
         cursor.execute(total_query)
         total = cursor.fetchone()
-        cursor.close()##-----！！！&&&##
+        cursor.close()
         if not total:
             total = "0"
         else:
@@ -539,7 +539,7 @@ def customize_spending():
                 month_spending[i] = int(spending[2])
             month_index.append(str(spending[0])+'-'+str(spending[1]))
         # open a "deceiving" ByteIO thread to generate the return make the url for plot
-        cursor.close()##-----！！！&&&##
+        cursor.close()
         
         img = BytesIO()
         fig, (ax1, ax2) = plt.subplots(2, figsize=(10,10))
@@ -642,9 +642,9 @@ def agent_customize_view():
             return render_template('agent_customize_view.html', error=error)
         else:
             sub1 = " f.departure_airport IN (SELECT airport_name FROM airport WHERE airport_city=\'{}\') ".format(departure_city)
-            sub2 = " f.departure_airport = \'{}\' ".format(departure_airport)
+            sub2 = " f.departure_airport = \"{}\" ".format(departure_airport)
             sub3 = " f.arrival_airport IN (SELECT airport_name FROM airport WHERE airport_city=\'{}\') ".format(arrival_city)
-            sub4 = " f.arrival_airport = \'{}\' ".format(arrival_airport)
+            sub4 = " f.arrival_airport = \"{}\" ".format(arrival_airport)
             if (flag_start and flag_end):
                 sub5 = "( DATE(f.departure_time) BETWEEN DATE(\'{}\') AND DATE(\'{}\') )".format(starting_date, ending_date)
             elif (flag_start and not flag_end):
@@ -711,9 +711,9 @@ def agent_search():
             return render_template('agent_search_result.html', error=error)
         else:
             sub1 = " departure_airport IN (SELECT airport_name FROM airport WHERE airport_city=\'{}\') ".format(departure_city)
-            sub2 = " departure_airport = \'{}\' ".format(departure_airport)
+            sub2 = " departure_airport = \"{}\" ".format(departure_airport)
             sub3 = " arrival_airport IN (SELECT airport_name FROM airport WHERE airport_city=\'{}\') ".format(arrival_city)
-            sub4 = " arrival_airport =\'{}\' ".format(arrival_airport)
+            sub4 = " arrival_airport =\"{}\" ".format(arrival_airport)
             sub5 = " DATE(departure_time) = DATE(\'{}\') ".format(flight_date)
             # recall that: boolen * string = string if boolen=True, or "" if boolen=False
             merged_sub = list(filter(None,[flag1*sub1, flag2*sub2, flag3*sub3, flag4*sub4, flag5*sub5]))
@@ -1013,7 +1013,7 @@ def staff_view_flight():
     query = "SELECT DISTINCT flight_num FROM flight WHERE airline_name = \'{}\';"
     cursor.execute(query.format(airline[0]))
     flight_num = cursor.fetchall()
-    cursor.close()##-----！！！&&&##
+    cursor.close()
     return render_template('staff_view_flight.html', flights=flights,
                                                      arrival_airport=arrival_airport,
                                                      departure_airport=departure_airport,
@@ -1048,9 +1048,9 @@ def staff_search_result():
         else:
             sub0 = " airline_name = \'{}\' ".format(airline)
             sub1 = " departure_airport IN (SELECT airport_name FROM airport WHERE airport_city=\'{}\') ".format(departure_city)
-            sub2 = " departure_airport = \'{}\' ".format(departure_airport)
+            sub2 = " departure_airport = \"{}\" ".format(departure_airport)
             sub3 = " arrival_airport IN (SELECT airport_name FROM airport WHERE airport_city=\'{}\') ".format(arrival_city)
-            sub4 = " arrival_airport =\'{}\' ".format(arrival_airport)
+            sub4 = " arrival_airport =\"{}\" ".format(arrival_airport)
             if (flag_start and flag_end):
                 sub5 = "( DATE(departure_time) BETWEEN DATE(\'{}\') AND DATE(\'{}\') )".format(starting_date, ending_date)
             elif (flag_start and not flag_end):
@@ -1123,7 +1123,7 @@ def staff_create_flight():
     query = "SELECT DISTINCT airplane_id FROM airplane WHERE airline_name = \'{}\';"
     cursor.execute(query.format(airline[0]))
     airplane_id = cursor.fetchall()
-    cursor.close()##-----！！！&&&##
+    cursor.close()
     return render_template('staff_create_flight.html', flights=flights,
                                                      arrival_airport=arrival_airport,
                                                      departure_airport=departure_airport,
@@ -1170,7 +1170,7 @@ def StaffCreateAuth():
         flash("Departure time must be earlier than arrival time!")
         return redirect(url_for('staff_create_flight'))
     
-    ins = "INSERT INTO flight VALUES(\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\')"
+    ins = "INSERT INTO flight VALUES(\'{}\', \'{}\', \"{}\", \'{}\', \"{}\", \'{}\', \'{}\', \'{}\', \'{}\')"
     cursor.execute(ins.format(airline, flight_num, departure_airport, departure_time,
                               arrival_airport, arrival_time, price, status, airplane_id))
     conn.commit()
@@ -1203,7 +1203,7 @@ def StaffCreateAuth():
     query = "SELECT DISTINCT airplane_id FROM airplane WHERE airline_name = \'{}\';"
     cursor.execute(query.format(airline[0]))
     airplane_id = cursor.fetchall()
-    cursor.close()##-----！！！&&&##
+    cursor.close()
     return render_template('staff_create_flight.html', success=True,
                                                        flights=flights,
                                                        arrival_airport=arrival_airport,
@@ -1225,7 +1225,7 @@ def staff_change_status():
     query = "SELECT DISTINCT flight_num FROM flight WHERE airline_name = \'{}\';"
     cursor.execute(query.format(airline[0]))
     flight_num = cursor.fetchall()
-    cursor.close()##-----！！！&&&##
+    cursor.close()
     return render_template('staff_change_status.html', airline=airline[0],
                                                        flight_num=flight_num)
     
@@ -1334,7 +1334,7 @@ def StaffAddAirportAuth():
     city = request.form['city']
     #check duplicated airport name
     cursor = conn.cursor()
-    query = "SELECT EXISTS(SELECT * FROM airport WHERE airport_name = \'{}\'); "
+    query = "SELECT EXISTS(SELECT * FROM airport WHERE airport_name = \"{}\"); "
     cursor.execute(query.format(airport))
     flag = cursor.fetchone()
     if flag[0] == 1: # duplicated name exists
@@ -1342,7 +1342,7 @@ def StaffAddAirportAuth():
         return redirect(url_for('staff_add_airport'))
     cursor.close()
     cursor = conn.cursor()
-    query = "INSERT INTO airport VALUES(\'{}\', \'{}\');"
+    query = "INSERT INTO airport VALUES(\"{}\", \'{}\');"
     cursor.execute(query.format(airport, city))
     conn.commit()
     cursor.close()
@@ -1556,7 +1556,7 @@ def staff_revenue_comparison():
 	cursor.execute(non_agent_last_month_query)
 	non_agent_last_month = cursor.fetchone()
 	cursor.close()
-	if not non_agent_last_month:
+	if not non_agent_last_month[0]:
 		non_agent_last_month = 0
 	else:
 		non_agent_last_month = int(non_agent_last_month[0])
@@ -1567,7 +1567,7 @@ def staff_revenue_comparison():
 	cursor.execute(agent_last_month_query)
 	agent_last_month = cursor.fetchone()
 	cursor.close()
-	if not agent_last_month:
+	if not agent_last_month[0]:
 		agent_last_month = 0
 	else:
 		agent_last_month = int(agent_last_month[0])
@@ -1578,7 +1578,7 @@ def staff_revenue_comparison():
 	cursor.execute(non_agent_last_year_query)
 	non_agent_last_year = cursor.fetchone()
 	cursor.close()
-	if not non_agent_last_year:
+	if not non_agent_last_year[0]:
 		non_agent_last_year = 0
 	else:
 		non_agent_last_year = int(non_agent_last_year[0])
@@ -1589,7 +1589,7 @@ def staff_revenue_comparison():
 	cursor.execute(agent_last_year_query)
 	agent_last_year = cursor.fetchone()
 	cursor.close()
-	if not agent_last_year:
+	if not agent_last_year[0]:
 		agent_last_year = 0
 	else:
 		agent_last_year = int(agent_last_year[0])
