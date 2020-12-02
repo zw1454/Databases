@@ -109,7 +109,7 @@ def search():
             sub5 = ' DATE(departure_time) = DATE(\"{}\") '.format(flight_date)
             # recall that: boolen * string = string if boolen=True, or "" if boolen=False
             merged_sub = list(filter(None,[flag1*sub1, flag2*sub2, flag3*sub3, flag4*sub4, flag5*sub5]))
-            query = "SELECT * FROM flight WHERE " + " AND ".join(merged_sub)
+            query = "SELECT * FROM flight WHERE " + " AND ".join(merged_sub) + " AND status = 'Upcoming' "
             cursor = conn.cursor()
             cursor.execute(query)
             search = cursor.fetchall()
@@ -312,7 +312,7 @@ def home():
     
     if identity == 'customer':
         cursor = conn.cursor()
-        query = "SELECT airline_name, flight_num, departure_airport, departure_time, arrival_airport, arrival_time, status FROM purchases NATURAL JOIN (ticket NATURAL JOIN flight) WHERE customer_email = \'{}\'"
+        query = "SELECT airline_name, flight_num, departure_airport, departure_time, arrival_airport, arrival_time, status FROM purchases NATURAL JOIN (ticket NATURAL JOIN flight) WHERE customer_email = \'{}\' AND status = 'Upcoming' "
         cursor.execute(query.format(username))
         data1 = cursor.fetchall()
         cursor.close()#Added cursor close point#
@@ -379,7 +379,7 @@ def customer_search():
             sub5 = " DATE(departure_time) = DATE(\'{}\') ".format(flight_date)
             # recall that: boolen * string = string if boolen=True, or "" if boolen=False
             merged_sub = list(filter(None,[flag1*sub1, flag2*sub2, flag3*sub3, flag4*sub4, flag5*sub5]))
-            query = "SELECT * FROM flight WHERE " + " AND ".join(merged_sub)
+            query = "SELECT * FROM flight WHERE " + " AND ".join(merged_sub) + " AND status = 'Upcoming' "
             cursor = conn.cursor()
             cursor.execute(query)
             search = cursor.fetchall()
@@ -570,11 +570,11 @@ def agent_view_flight():
     
     #find all upcoming flights the agent ordered for customers
     query = "SELECT f.airline_name, f.flight_num, f.departure_airport, f.departure_time, " +\
-            "f.arrival_airport, f.arrival_time, f.price, f.status, f.airplane_id " +\
+            "f.arrival_airport, f.arrival_time, f.price, f.status, f.airplane_id, p.customer_email " +\
             "FROM purchases p, ticket t, flight f " +\
             "WHERE p.booking_agent_id = \'{}\' AND p.ticket_id = t.ticket_id AND " +\
             "t.airline_name = f.airline_name AND t.flight_num = f.flight_num AND " +\
-            "f.departure_time >= NOW() ;"
+            "f.status = 'Upcoming' ;"
     cursor = conn.cursor()
     cursor.execute(query.format(agent_id[0]))
     flights = cursor.fetchall()
@@ -717,7 +717,7 @@ def agent_search():
             sub5 = " DATE(departure_time) = DATE(\'{}\') ".format(flight_date)
             # recall that: boolen * string = string if boolen=True, or "" if boolen=False
             merged_sub = list(filter(None,[flag1*sub1, flag2*sub2, flag3*sub3, flag4*sub4, flag5*sub5]))
-            query = "SELECT * FROM flight WHERE " + " AND ".join(merged_sub)
+            query = "SELECT * FROM flight WHERE status = 'Upcoming' AND " + " AND ".join(merged_sub)
             cursor = conn.cursor()
             cursor.execute(query)
             search = cursor.fetchall()
@@ -835,7 +835,7 @@ def agent_view_commission():
             "FROM purchases p, ticket t, flight f " +\
             "WHERE p.booking_agent_id = \'{}\' AND p.ticket_id = t.ticket_id AND " +\
             "t.airline_name = f.airline_name AND t.flight_num = f.flight_num AND " +\
-            "p.purchase_date >= ADDDATE(p.purchase_date, INTERVAL -30 DAY) ;"
+            "p.purchase_date >= ADDDATE(DATE(NOW()), INTERVAL -30 DAY) ;"
     cursor = conn.cursor()
     cursor.execute(query.format(agent_id[0]))
     commission = cursor.fetchone()
@@ -844,7 +844,7 @@ def agent_view_commission():
     query = "SELECT COUNT(*) " +\
             "FROM purchases p " +\
             "WHERE p.booking_agent_id = \'{}\' AND " +\
-            "p.purchase_date >= ADDDATE(p.purchase_date, INTERVAL -30 DAY) ;"
+            "p.purchase_date >= ADDDATE(DATE(NOW()), INTERVAL -30 DAY) ;"
     cursor = conn.cursor()
     cursor.execute(query.format(agent_id[0]))
     num_ticket = cursor.fetchone()
