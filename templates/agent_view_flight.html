@@ -22,6 +22,7 @@
         <th>Price</th>
         <th>Status</th>
         <th>Airplane ID</th>
+        <th>Customer Email</th>
       </tr>
 
       {% for result in flights %}
@@ -35,6 +36,7 @@
         <td>{{result[6]}}</td>
         <td>{{result[7]}}</td>
         <td>{{result[8]}}</td>
+        <td>{{result[9]}}</td>
       </tr>
       {% endfor %}
     </table>

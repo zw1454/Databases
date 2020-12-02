@@ -23,6 +23,7 @@
           <th>Price</th>
           <th>Status</th>
           <th>Airplane ID</th>
+          <th>Customer Email</th>
         </tr>
 
         {% for result in search %}
@@ -36,6 +37,7 @@
           <td>{{result[6]}}</td>
           <td>{{result[7]}}</td>
           <td>{{result[8]}}</td>
+          <td>{{result[13]}}</td>
         </tr>
         {% endfor %}
         </br>

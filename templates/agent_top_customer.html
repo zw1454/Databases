@@ -14,6 +14,7 @@
     <table border="1">
       <tr> <!--The title line of customers-->
         <th>Email</th>
+        <th>Ticket Sold</th>
         <th>Name</th>
         <th>Phone Number</th>
         <th>City</th>
@@ -29,6 +30,7 @@
           <td>{{line[3]}}</td>
           <td>{{line[4]}}</td>
           <td>{{line[5]}}</td>
+          <td>{{line[6]}}</td>
         </tr>
         {% endfor %}
       {% endif %}
@@ -38,6 +40,7 @@
     <table border="1">
       <tr> <!--The title line of customers-->
         <th>Email</th>
+        <th>Commission Earned</th>
         <th>Name</th>
         <th>Phone Number</th>
         <th>City</th>
@@ -48,16 +51,21 @@
         {% for line in customer_commission %}
         <tr>
           <td>{{line[0]}}</td>
-          <td>{{line[1]}}</td>
+          <td>${{line[1]}}</td>
           <td>{{line[2]}}</td>
           <td>{{line[3]}}</td>
           <td>{{line[4]}}</td>
           <td>{{line[5]}}</td>
+          <td>{{line[6]}}</td>
         </tr>
         {% endfor %}
       {% endif %}
     </table>
 
+    <section>
+      <img src="data:image/png;base64, {{ plot_url }}" width="600">
+    </section>
+    
     <br/><br/>
     <a href="/home">Go back</a>
   </body>
